@@ -39,8 +39,9 @@ class tcp(threading.Thread):
         str_data = str_data.replace('\n','')
         parts = str_data.split(':')
         for part in parts:
-            tmp = udp.peer_udp(part)
-            tmp.start()
+            if self.screen_name in part:
+                tmp = udp.listen_udp(part)
+                tmp.start()
             self.people.put(part)
 
     def rejected(self, data:bytes):
