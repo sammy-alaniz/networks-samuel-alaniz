@@ -1,5 +1,6 @@
 import threading
 import socket
+import messages
 
 class listen_udp(threading.Thread):
     def __init__(self, chatter_info:str):
@@ -23,3 +24,10 @@ class listen_udp(threading.Thread):
                 print(tmp)
                 data = b''
 
+def sendMessage(screen_name:str, person:str, msg:str):
+    person_split = person.split(' ')
+    ip = person_split[1]
+    port = person_split[2]
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.sendto(messages.mesg_message(screen_name,msg),(ip,int(port)))
+    s.close()
