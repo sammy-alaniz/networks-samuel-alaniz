@@ -3,19 +3,22 @@ import queue
 import socket
 import messages
 import udp
+import random
 
 class tcp(threading.Thread):
     def __init__(self, screen_name:str ,ip:str, port:str ,people:queue):
         threading.Thread.__init__(self)
         self.ip = ip
-        self.port = port
+        self.server_port = port
+        client_port = str(random.randint(50000,60000))
+        self.client_port = client_port
         self.people = people
         self.screen_name = screen_name
 
     def run(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((self.ip, int(self.port)))
-        s.sendall(messages.hello_message(self.screen_name, self.ip, self.port))
+        s.connect((self.ip, int(self.server_port)))
+        s.sendall(messages.hello_message(self.screen_name, self.ip, self.client_port))
         data = b''
         while True:
            buffer = s.recv(1024)
