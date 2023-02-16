@@ -40,7 +40,7 @@ class tcp(threading.Thread):
         parts = str_data.split(':')
         for part in parts:
             if self.screen_name in part:
-                tmp = udp.listen_udp(part)
+                tmp = udp.listen_udp(part,self.people)
                 tmp.start()
             self.people.put(part)
 
