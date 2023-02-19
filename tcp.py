@@ -4,6 +4,7 @@ import socket
 import messages
 import udp
 import random
+import sys
 
 class tcp(threading.Thread):
     def __init__(self, screen_name:str ,ip:str, port:str ,people:queue):
@@ -23,12 +24,15 @@ class tcp(threading.Thread):
         client_ip = self.socket.getsockname()[0]
         self.socket.sendall(messages.hello_message(self.screen_name, client_ip, self.client_port))
         data = b''
-        while self.keep_going:
-           buffer = self.socket.recv(1024)
-           data += buffer
-           if b'\n' in buffer:
-                self.parse(data)
-                data = b''
+        try:
+            while self.keep_going:
+                buffer = self.socket.recv(1024)
+                data += buffer
+                if b'\n' in buffer:
+                    self.parse(data)
+                    data = b''
+        except OSError as e:
+            sys.exit()
 
     def parse(self, data: bytes):
         if b'ACPT' in data:
@@ -43,7 +47,7 @@ class tcp(threading.Thread):
         parts = str_data.split(':')
         for part in parts:
             if self.screen_name in part:
-                self.udp_thread = udp.listen_udp(part,self.people)
+                self.udp_thread = udp.listen_udp(part,self.people,self)
                 self.udp_thread.start()
             self.people.put(part)
 
@@ -58,6 +62,12 @@ class tcp(threading.Thread):
 
     def send_exit(self):
         self.socket.sendall(b'EXIT\n')
+
+    def budlight(self):
+        self.socket.shutdown(socket.SHUT_RDWR)
+        self.socket.close()
+        self.keep_going = False
+        sys.exit()
         
 
 

@@ -2,9 +2,10 @@ import threading
 import socket
 import messages
 import queue
-
+import sys
+import tcp
 class listen_udp(threading.Thread):
-    def __init__(self, chatter_info:str, people:queue):
+    def __init__(self, chatter_info:str, people:queue, parent: tcp):
         threading.Thread.__init__(self)
         chatter_info = chatter_info.split(' ')
         self.screen_name = chatter_info[0]
@@ -13,6 +14,7 @@ class listen_udp(threading.Thread):
         self.people = people
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind((self.ip, int(self.port)))
+        self.parent = parent
 
     def run(self):
         print('udp run', self.screen_name, self.ip, self.port)
@@ -43,6 +45,9 @@ class listen_udp(threading.Thread):
                 continue
             self.people.put(person)
         print('Left the chat room : ', tmp)
+        if tmp == 'Sammy':
+            self.parent.budlight()
+            sys.exit()
         self._print_people()
 
     def join(self, data: bytes):
