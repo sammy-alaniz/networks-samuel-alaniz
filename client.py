@@ -20,9 +20,6 @@ if __name__ == "__main__":
            for person in list(people.queue):
             udp.sendMessage(screen_name, person,tmp)
         except EOFError:
-            print('end of file reached')
-            print('tcp keep going', tcp_thread)
-            print('udp', tcp_thread.udp_thread)
             tcp_thread.send_exit()
             loop = False
 

@@ -5,7 +5,7 @@ import queue
 import sys
 import tcp
 class listen_udp(threading.Thread):
-    def __init__(self, chatter_info:str, people:queue, parent: tcp):
+    def __init__(self, chatter_info:str, people:queue, parent: tcp, client_instance_name: str):
         threading.Thread.__init__(self)
         chatter_info = chatter_info.split(' ')
         self.screen_name = chatter_info[0]
@@ -15,9 +15,9 @@ class listen_udp(threading.Thread):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind((self.ip, int(self.port)))
         self.parent = parent
+        self.client_instance_name = client_instance_name
 
     def run(self):
-        print('udp run', self.screen_name, self.ip, self.port)
         data = b''
         while True:
             buffer = self.socket.recv(1024)
@@ -35,7 +35,6 @@ class listen_udp(threading.Thread):
             self.exit(data)
 
     def exit(self, data:bytes):
-        print('exit')
         tmp = data.decode('utf-8')
         tmp = tmp.replace('EXIT ','')
         tmp = tmp.replace('\n','')
@@ -45,10 +44,10 @@ class listen_udp(threading.Thread):
                 continue
             self.people.put(person)
         print('Left the chat room : ', tmp)
-        if tmp == 'Sammy':
+        if tmp == self.client_instance_name:
             self.parent.budlight()
+            print('good bye!')
             sys.exit()
-        self._print_people()
 
     def join(self, data: bytes):
         tmp = data.decode('utf-8')
@@ -56,7 +55,6 @@ class listen_udp(threading.Thread):
         tmp = tmp.replace('\n','')
         print('User has joined', tmp)
         self.people.put(tmp)
-        self._print_people()
 
     def mesg(self, data: bytes):
         tmp = data.decode('utf-8')

@@ -47,9 +47,10 @@ class tcp(threading.Thread):
         parts = str_data.split(':')
         for part in parts:
             if self.screen_name in part:
-                self.udp_thread = udp.listen_udp(part,self.people,self)
+                self.udp_thread = udp.listen_udp(part,self.people,self, self.screen_name)
                 self.udp_thread.start()
             self.people.put(part)
+        self._print_chatroom()
 
     def rejected(self, data:bytes):
         str_data = data.decode('utf-8')
@@ -68,6 +69,11 @@ class tcp(threading.Thread):
         self.socket.close()
         self.keep_going = False
         sys.exit()
+
+    def _print_chatroom(self):
+        print('In chat room')
+        for person in list(self.people.queue):
+            print(person)
         
 
 
