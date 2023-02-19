@@ -18,7 +18,8 @@ class tcp(threading.Thread):
     def run(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((self.ip, int(self.server_port)))
-        s.sendall(messages.hello_message(self.screen_name, self.ip, self.client_port))
+        client_ip = s.getsockname()[0]
+        s.sendall(messages.hello_message(self.screen_name, client_ip, self.client_port))
         data = b''
         while True:
            buffer = s.recv(1024)
