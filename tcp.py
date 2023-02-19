@@ -17,6 +17,7 @@ class tcp(threading.Thread):
         self.keep_going = True
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((self.ip, int(self.server_port)))
+        self.udp_thread = None
 
     def run(self):
         client_ip = self.socket.getsockname()[0]
@@ -42,8 +43,8 @@ class tcp(threading.Thread):
         parts = str_data.split(':')
         for part in parts:
             if self.screen_name in part:
-                tmp = udp.listen_udp(part,self.people)
-                tmp.start()
+                self.udp_thread = udp.listen_udp(part,self.people)
+                self.udp_thread.start()
             self.people.put(part)
 
     def rejected(self, data:bytes):

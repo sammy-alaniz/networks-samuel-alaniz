@@ -11,14 +11,14 @@ class listen_udp(threading.Thread):
         self.ip = chatter_info[1]
         self.port = chatter_info[2]
         self.people = people
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.bind((self.ip, int(self.port)))
 
     def run(self):
         print('udp run', self.screen_name, self.ip, self.port)
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.bind((self.ip, int(self.port)))
         data = b''
         while True:
-            buffer = s.recv(1024)
+            buffer = self.socket.recv(1024)
             data += buffer
             if b'\n' in buffer:
                 self.parse(data)
