@@ -14,15 +14,16 @@ class tcp(threading.Thread):
         self.client_port = client_port
         self.people = people
         self.screen_name = screen_name
+        self.keep_going = True
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.connect((self.ip, int(self.server_port)))
 
     def run(self):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((self.ip, int(self.server_port)))
-        client_ip = s.getsockname()[0]
-        s.sendall(messages.hello_message(self.screen_name, client_ip, self.client_port))
+        client_ip = self.socket.getsockname()[0]
+        self.socket.sendall(messages.hello_message(self.screen_name, client_ip, self.client_port))
         data = b''
-        while True:
-           buffer = s.recv(1024)
+        while self.keep_going:
+           buffer = self.socket.recv(1024)
            data += buffer
            if b'\n' in buffer:
                 self.parse(data)
@@ -50,6 +51,12 @@ class tcp(threading.Thread):
         str_data = str_data.replace('RJCT ', '')
         str_data = str_data.replace('\n','')
         print('This name is already in use! : ', str_data)
+
+    def loop(self)->bool:
+        return self.keep_going
+
+    def send_exit(self):
+        self.socket.sendall(b'EXIT\n')
         
 
 

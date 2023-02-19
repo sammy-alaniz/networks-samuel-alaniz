@@ -12,11 +12,14 @@ if __name__ == "__main__":
     tcp_thread = tcp.tcp(screen_name, server_ip, server_port, people)
     tcp_thread.start()
 
-    while True:
+    while tcp_thread.loop():
         try:
            tmp = input()
+           for person in list(people.queue):
+            udp.sendMessage(screen_name, person,tmp)
         except EOFError:
             print('end of file reached')
-        for person in list(people.queue):
-            udp.sendMessage(screen_name, person,tmp)
+            tcp_thread.send_exit()
+
+
     
