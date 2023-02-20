@@ -58,13 +58,10 @@ class tcp(threading.Thread):
         str_data = str_data.replace('\n','')
         print('This name is already in use! : ', str_data)
 
-    def loop(self)->bool:
-        return self.keep_going
-
     def send_exit(self):
         self.socket.sendall(b'EXIT\n')
 
-    def budlight(self):
+    def end_tcp(self):
         self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
         self.keep_going = False

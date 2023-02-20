@@ -45,7 +45,7 @@ class listen_udp(threading.Thread):
             self.people.put(person)
         print('Left the chat room : ', tmp)
         if tmp == self.client_instance_name:
-            self.parent.budlight()
+            self.parent.end_tcp()
             print('good bye!')
             sys.exit()
 
