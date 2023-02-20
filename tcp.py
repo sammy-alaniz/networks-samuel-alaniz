@@ -70,9 +70,11 @@ class tcp(threading.Thread):
         sys.exit()
 
     def _print_chatroom(self):
-        print('In chat room')
+        print('\nIn chat room :')
         for person in list(self.people.queue):
-            print(person)
+            name = person.split(' ')
+            print(name[0])
+        print('\n')
         
 
 

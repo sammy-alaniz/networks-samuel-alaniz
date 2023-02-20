@@ -45,15 +45,16 @@ class listen_udp(threading.Thread):
             self.people.put(person)
         print('Left the chat room : ', tmp)
         if tmp == self.client_instance_name:
+            print('good bye!\n')
             self.parent.end_tcp()
-            print('good bye!')
             sys.exit()
 
     def join(self, data: bytes):
         tmp = data.decode('utf-8')
         tmp = tmp.replace('JOIN ','')
         tmp = tmp.replace('\n','')
-        print('User has joined', tmp)
+        split = tmp.split(' ')
+        print('User has joined : ', split[0])
         self.people.put(tmp)
 
     def mesg(self, data: bytes):
