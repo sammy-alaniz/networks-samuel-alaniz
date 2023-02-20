@@ -57,9 +57,11 @@ class tcp(threading.Thread):
         str_data = str_data.replace('RJCT ', '')
         str_data = str_data.replace('\n','')
         print('This name is already in use! : ', str_data)
+        self.end_tcp()
 
     def send_exit(self):
-        self.socket.sendall(b'EXIT\n')
+        if self.keep_going:
+            self.socket.sendall(b'EXIT\n')
 
     def end_tcp(self):
         self.socket.shutdown(socket.SHUT_RDWR)
