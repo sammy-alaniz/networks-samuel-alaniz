@@ -43,7 +43,7 @@ class tcp_client_thread(threading.Thread):
                 if b'\n' in buffer:
                     self.parse(data)
                     data = b''
-                if b'' in buffer:
+                if not buffer:
                     self.shutdown()
         except OSError as e:
             sys.exit()
@@ -53,6 +53,7 @@ class tcp_client_thread(threading.Thread):
             self.hello(msg)
 
     def hello(self,msg:bytes):
+        print(msg)
         self.hello_data = messages.parse_hello_message(msg)
         if self.cleint_data.contains(msg):
             self.send_reject_message()
@@ -61,7 +62,7 @@ class tcp_client_thread(threading.Thread):
     
     def send_reject_message(self):
         print('send reject message')
-
+        self.sock.send(messages.reject_message(self.hello_data.screen_name))
         print('screen name', self.hello_data.screen_name)
         print('ip ', self.hello_data.ip)
         print('port ', self.hello_data.port)
@@ -73,7 +74,8 @@ class tcp_client_thread(threading.Thread):
             print('port ', self.hello_data.port)
 
     def shutdown(self):
-        print('Shuting Down!')
+        print('\nShuting Down!')
+        self.cleint_data.remove(self.hello_data.original_msg)
         self._print()
         sys.exit()
         
@@ -111,5 +113,9 @@ def send_message(msg:bytes, port:str):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     ip = s.getsockname()[0]
     s.connect((ip,int(port)))
-    s.sendall(msg)
-    s.close()
+    time.sleep(2)
+    s.send(msg)
+    s.send(msg)
+    s.send(msg)
+    time.sleep(10)
+    #s.close()
