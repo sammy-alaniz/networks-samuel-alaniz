@@ -36,8 +36,6 @@ class tcp_client_thread(threading.Thread):
         data = b''
         try:
             while True:
-                time.sleep(2)
-                #self._print()
                 buffer = self.sock.recv(1024)
                 data += buffer
                 if b'\n' in buffer:
@@ -55,10 +53,10 @@ class tcp_client_thread(threading.Thread):
     def hello(self,msg:bytes):
         print(msg)
         self.hello_data = messages.parse_hello_message(msg)
-        if self.cleint_data.contains(msg):
+        if self.cleint_data.contains(self.hello_data.screen_name):
             self.send_reject_message()
         else:
-            self.cleint_data.append(msg)
+            self.cleint_data.append(self.hello_data.screen_name, self.hello_data.ip, self.hello_data.port)
     
     def send_reject_message(self):
         print('send reject message')
