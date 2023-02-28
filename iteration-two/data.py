@@ -31,5 +31,9 @@ class ClientData:
                 if i.screen_name == screen_name:
                     return True
             return False
+        
+    def get_list(self) -> list:
+        with self._lock:
+            return self._client_list.copy()
 
     

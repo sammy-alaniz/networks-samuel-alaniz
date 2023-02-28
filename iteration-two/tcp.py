@@ -57,13 +57,28 @@ class tcp_client_thread(threading.Thread):
             self.send_reject_message()
         else:
             self.cleint_data.append(self.hello_data.screen_name, self.hello_data.ip, self.hello_data.port)
+            self.send_accept_message()
+
     
     def send_reject_message(self):
-        print('send reject message')
         self.sock.send(messages.reject_message(self.hello_data.screen_name))
-        print('screen name', self.hello_data.screen_name)
-        print('ip ', self.hello_data.ip)
-        print('port ', self.hello_data.port)
+    
+    def send_accept_message(self):
+        print('sending accept')
+        accept_msg = 'ACPT '
+        tmp_client_list = self.cleint_data.get_list()
+
+        for client in tmp_client_list:
+            accept_msg += client.screen_name + ' '
+            accept_msg += client.ip + ' '
+            accept_msg += client.port
+            accept_msg += ':'
+        
+        accept_msg = accept_msg[:-1]
+        accept_msg += '\n'
+        print(accept_msg.encode('utf-8'))
+        self.sock.send(accept_msg.encode('utf-8'))
+
     
     def _print(self):
         if self.hello_data != None:
@@ -73,7 +88,7 @@ class tcp_client_thread(threading.Thread):
 
     def shutdown(self):
         print('\nShuting Down!')
-        self.cleint_data.remove(self.hello_data.original_msg)
+        self.cleint_data.remove(self.hello_data.screen_name)
         self._print()
         sys.exit()
         
