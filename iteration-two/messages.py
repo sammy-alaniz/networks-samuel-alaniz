@@ -7,6 +7,11 @@ def reject_message(screen_name:str) -> str:
     rtn = 'RJCT ' + screen_name + '\n'
     return rtn.encode('utf-8')
 
+def join_message(screen_name:str, ip:str, port:str) -> str:
+    rtn = 'JOIN ' + screen_name + ' ' + ip + ' ' + port + '\n'
+    print(rtn)
+    return rtn.encode('utf-8')
+
 class parse_hello_message:
     def __init__(self, msg:bytes) -> None:
         self.original_msg = msg

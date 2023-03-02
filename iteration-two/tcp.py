@@ -23,8 +23,6 @@ class tcp_init_thread(threading.Thread):
                 client_thread.start()
 
 
-
-
 class tcp_client_thread(threading.Thread):
     def __init__(self, connection:socket, cleint_data:data.ClientData):
         threading.Thread.__init__(self)
@@ -78,6 +76,20 @@ class tcp_client_thread(threading.Thread):
         accept_msg += '\n'
         print(accept_msg.encode('utf-8'))
         self.sock.send(accept_msg.encode('utf-8'))
+
+        self.send_join_all_members_udp()
+
+    def send_join_all_members_udp(self):
+        print('\nsend join to all members of chat group')
+        udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        tmp_client_list = self.cleint_data.get_list()
+
+        for client in tmp_client_list:
+            print('TEST: send join loop name ->', client.screen_name)
+            ip = client.ip
+            port = client.port
+            udp_socket.sendto(messages.join_message(self.hello_data.screen_name, self.hello_data.ip, self.hello_data.port),(ip,int(port)))
 
     
     def _print(self):
