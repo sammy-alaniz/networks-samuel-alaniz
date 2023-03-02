@@ -47,6 +47,23 @@ class tcp_client_thread(threading.Thread):
     def parse(self, msg:bytes):
         if b'HELO ' in msg:
             self.hello(msg)
+        if b'EXIT\n' in msg:
+            self.send_exit_to_all_clients()
+
+    def send_exit_to_all_clients(self):
+        print('send exit to all clients method hit')
+        udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        tmp_client_list = self.cleint_data.get_list()
+
+        for client in tmp_client_list:
+            print('TEST: send EXIT loop name ->', client.screen_name)
+            ip = client.ip
+            port = client.port
+            rtn = 'EXIT ' + self.hello_data.screen_name + '\n'
+            print(rtn.encode('utf-8'))
+            udp_socket.sendto(rtn.encode('utf-8'),(ip,int(port)))
+
 
     def hello(self,msg:bytes):
         print(msg)
