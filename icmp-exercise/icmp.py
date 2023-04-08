@@ -43,7 +43,21 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
 
         timeReceived = time.time()
         recPacket, addr = mySocket.recvfrom(1024)
+        print('\nLength of packet :', len(recPacket))
+        print('Full packet : \n')
+        print(recPacket)
+        
+        print('\nPayload : \n')
+        icmp_payload_bytes = recPacket[28:]
+        print(icmp_payload_bytes)
 
+        print('\nPayload length : \n')
+        print(len(icmp_payload_bytes))
+
+        # convert from 8 byte to time
+        timestamp_unpack = struct.unpack('d', icmp_payload_bytes)[0]
+        original_ping_time = time.gmtime(timestamp_unpack)
+        print(original_ping_time)
         # Fill in end
 
         timeLeft = timeLeft - howLongInSelect
@@ -107,4 +121,4 @@ def ping(host, timeout=1):
     return delay
 
 
-ping("127.0.0.1")
+ping("google.com")
