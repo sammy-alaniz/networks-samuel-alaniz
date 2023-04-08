@@ -39,23 +39,25 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
         whatReady = select.select([mySocket], [], [], timeLeft)
         howLongInSelect = (time.time() - startedSelect)
         if whatReady[0] == []:  # Timeout
-            return "Request timed out."
+            #return "Request timed out."
+            return 0
 
         timeReceived = time.time()
         recPacket, addr = mySocket.recvfrom(1024)
+        #icmp_header_bytes = recPacket[20:28] <- print this response
         icmp_payload_bytes = recPacket[28:]
 
         # convert from 8 byte to time
         timestamp_unpack = struct.unpack('d', icmp_payload_bytes)[0]
         
-        print('\nRTT : \n')
         rtt = abs(timeReceived - timestamp_unpack)
-        print('Seconds : ', rtt)
-        print('Miliseconds : ', (rtt * 1000))
 
         timeLeft = timeLeft - howLongInSelect
         if timeLeft <= 0:
-            return "Request timed out."
+            #return "Request timed out."
+            return 0
+        
+        return rtt
 
 
 def sendOnePing(mySocket, destAddr, ID):
@@ -103,12 +105,47 @@ def doOnePing(destAddr, timeout):
 def ping(host, timeout=1):
     # timeout=1 means: If one second goes by without a reply from the server,
     # the client assumes that either the client's ping or the server's pong is lost
+    delay_max = 0
+    delay_min = 0
+    delay_arr = []
+
+    packets_sent = 0
+    packets_lost = 0
+    average_loss = 0
+
     dest = gethostbyname(host)
     print("Pinging " + dest + " using Python:")
     print("")
     # Send ping requests to a server separated by approximately one second
     while 1:
         delay = doOnePing(dest, timeout)
+        packets_sent = packets_sent + 1
+        
+        # min, max, avg rtt, percentage of packet loss
+
+        if (delay > 0):
+            print('\nSeconds : ', delay)
+            print('Miliseconds : ', (delay * 1000))
+            print('')
+            if delay_min == 0:
+                delay_min = delay
+            delay_max = max(delay_max, delay)
+            delay_min = min(delay_min, delay)
+            print('Delay Min : ', delay_min)
+            print('Delay Max : ', delay_max)
+            delay_arr.append(delay)
+            average = (sum(delay_arr)/len(delay_arr))
+            print('Average RTT for all packets (not including the timeouts) : ', average)
+
+
+
+        if (delay == 0):
+           print('lost packet')
+           packets_lost = packets_lost + 1
+           average_loss = (packets_lost/packets_sent)*100
+        
+        print('\nAverage packet loss percentage %: ', average_loss)
+
         time.sleep(1)  # one second
 
     return delay
