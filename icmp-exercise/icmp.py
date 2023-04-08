@@ -43,22 +43,15 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
 
         timeReceived = time.time()
         recPacket, addr = mySocket.recvfrom(1024)
-        print('\nLength of packet :', len(recPacket))
-        print('Full packet : \n')
-        print(recPacket)
-        
-        print('\nPayload : \n')
         icmp_payload_bytes = recPacket[28:]
-        print(icmp_payload_bytes)
-
-        print('\nPayload length : \n')
-        print(len(icmp_payload_bytes))
 
         # convert from 8 byte to time
         timestamp_unpack = struct.unpack('d', icmp_payload_bytes)[0]
-        original_ping_time = time.gmtime(timestamp_unpack)
-        print(original_ping_time)
-        # Fill in end
+        
+        print('\nRTT : \n')
+        rtt = abs(timeReceived - timestamp_unpack)
+        print('Seconds : ', rtt)
+        print('Miliseconds : ', (rtt * 1000))
 
         timeLeft = timeLeft - howLongInSelect
         if timeLeft <= 0:
