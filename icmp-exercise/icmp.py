@@ -8,6 +8,20 @@ import binascii
 
 ICMP_ECHO_REQUEST = 8
 
+def get_icmp_error_message(return_code):
+    if return_code == 2:
+        return "Destination Network Unreachable"
+    elif return_code == 3:
+        return "Destination Host Unreachable"
+    elif return_code == 6:
+        return "Redirect"
+    elif return_code == 11:
+        return "TTL Expired"
+    elif return_code == 12:
+        return "Parameter Problem / Request Timed Out"
+    else:
+        return "Unknown ICMP Error"
+
 def checksum(string):
     csum = 0
     countTo = (len(string) // 2) * 2
@@ -44,7 +58,21 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
 
         timeReceived = time.time()
         recPacket, addr = mySocket.recvfrom(1024)
-        #icmp_header_bytes = recPacket[20:28] <- print this response
+        icmp_type_bytes = recPacket[20:21]
+        icmp_type_bytes = recPacket[21:22]
+        icmp_ID_bytes = recPacket[24:26]
+
+        icmp_type = struct.unpack('b', icmp_type_bytes)[0]
+        icmp_ID = struct.unpack('H', icmp_ID_bytes)[0]
+
+        if icmp_ID != ID :
+            print('ICMP echo does not match ID!')
+            return 0
+
+        if icmp_type != 0 :
+            print('ICMP echo had an ERROR!' + get_icmp_error_message(icmp_type))
+            return 0
+
         icmp_payload_bytes = recPacket[28:]
 
         # convert from 8 byte to time
@@ -66,7 +94,7 @@ def sendOnePing(mySocket, destAddr, ID):
     myChecksum = 0
     # Make a dummy header with a 0 checksum
     # struct -- Interpret strings as packed binary data
-    header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, 1)
+    header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, 2)
     data = struct.pack("d", time.time())
 
     myChecksum = checksum(header + data)
@@ -78,7 +106,7 @@ def sendOnePing(mySocket, destAddr, ID):
     else:
         myChecksum = htons(myChecksum)
 
-    header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, 1)
+    header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, 2)
     packet = header + data
 
     mySocket.sendto(packet, (destAddr, 1))  # AF_INET address must be tuple, not str
@@ -124,18 +152,18 @@ def ping(host, timeout=1):
         # min, max, avg rtt, percentage of packet loss
 
         if (delay > 0):
-            print('\nSeconds : ', delay)
-            print('Miliseconds : ', (delay * 1000))
+            print('\n---------------------------------------')
+            print('Current packet RTT miliseconds : ', (delay * 1000))
             print('')
             if delay_min == 0:
                 delay_min = delay
             delay_max = max(delay_max, delay)
             delay_min = min(delay_min, delay)
-            print('Delay Min : ', delay_min)
-            print('Delay Max : ', delay_max)
+            print('Delay Min miliseconds: ', (delay_min*1000))
+            print('Delay Max miliseconds : ', (delay_max*1000))
             delay_arr.append(delay)
-            average = (sum(delay_arr)/len(delay_arr))
-            print('Average RTT for all packets (not including the timeouts) : ', average)
+            average = (sum(delay_arr)/len(delay_arr))*1000
+            print('Average RTT for all packets (not including the timeouts) miliseconds: ', average)
 
 
 
@@ -151,4 +179,10 @@ def ping(host, timeout=1):
     return delay
 
 
-ping("google.com")
+
+try:
+    # ping("dnsseed.bluematt.me") # Germany 
+    # ping("dnsseed.bitcoin.dashjr.org") # Taiwan
+    ping("bitcoin.jonasschnelli.ch") # Sweden
+except KeyboardInterrupt:
+    print('\nping over')
