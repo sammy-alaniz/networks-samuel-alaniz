@@ -182,8 +182,8 @@ def ping(host, timeout=1):
 
 try:
     # ping('142.250.115.101') # google.com -> United States
-    ping("172.105.132.10") # dnsseed.bluematt.me -> Germany 
+    # ping("172.105.132.10") # dnsseed.bluematt.me -> Germany 
     # ping("35.199.107.158") # dnsseed.bitcoin.dashjr.org -> Taiwan
-    # ping("95.216.36.239") # bitcoin.jonasschnelli.ch -> Sweden
+    ping("95.216.36.239") # bitcoin.jonasschnelli.ch -> Sweden
 except KeyboardInterrupt:
     print('\nping over')
